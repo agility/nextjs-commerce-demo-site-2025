@@ -4,7 +4,7 @@ import { useCart } from "@/lib/hooks/useCart"
 import type { ICartItem } from "@/lib/types/ICart"
 import { formatPrice } from "@/lib/utils"
 import { MinusIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline"
-import Image from "next/image"
+import { AgilityPic } from "@agility/nextjs"
 
 interface CartLineItemProps {
   item: ICartItem
@@ -35,20 +35,16 @@ export function CartLineItem({ item }: CartLineItemProps) {
       {/* Product Image */}
       <div className="relative size-24 shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
         {item.variant.variantImage?.url ? (
-          <Image
-            src={item.variant.variantImage.url}
-            alt={item.product.title}
-            fill
-            className="object-cover"
-            sizes="96px"
+          <AgilityPic
+            image={item.variant.variantImage}
+            fallbackWidth={96}
+            className="size-full object-cover"
           />
         ) : item.product.featuredImage?.url ? (
-          <Image
-            src={item.product.featuredImage.url}
-            alt={item.product.title}
-            fill
-            className="object-cover"
-            sizes="96px"
+          <AgilityPic
+            image={item.product.featuredImage}
+            fallbackWidth={96}
+            className="size-full object-cover"
           />
         ) : (
           <div className="flex size-full items-center justify-center text-gray-400">
@@ -82,9 +78,9 @@ export function CartLineItem({ item }: CartLineItemProps) {
                 </span>
               </div>
             )}
-            {item.variant.size?.fields?.title && (
+            {'fields' in item.variant.size && (item.variant.size.fields.sizeName || item.variant.size.fields.title) && (
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Size: {item.variant.size.fields.title}
+                Size: {item.variant.size.fields.sizeName || item.variant.size.fields.title}
               </p>
             )}
           </div>

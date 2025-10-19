@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     // Filter by category if specified
     if (category && category !== 'all') {
       products = products.filter((product) => {
-        const productCategory = product.fields.category?.fields?.title
+        const productCategory = product.fields.category?.fields?.name
         return productCategory === category
       })
     }
@@ -31,10 +31,10 @@ export async function GET(request: NextRequest) {
     // Sort products based on sort parameter
     switch (sort) {
       case 'price-low':
-        products.sort((a, b) => a.fields.basePrice - b.fields.basePrice)
+        products.sort((a, b) => parseFloat(a.fields.basePrice) - parseFloat(b.fields.basePrice))
         break
       case 'price-high':
-        products.sort((a, b) => b.fields.basePrice - a.fields.basePrice)
+        products.sort((a, b) => parseFloat(b.fields.basePrice) - parseFloat(a.fields.basePrice))
         break
       case 'name-az':
         products.sort((a, b) => a.fields.title.localeCompare(b.fields.title))
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       slug: product.fields.slug,
       description: product.fields.description,
       basePrice: product.fields.basePrice,
-      category: product.fields.category?.fields?.title || null,
+      category: product.fields.category?.fields?.name || null,
       featuredImage: product.fields.featuredImage
         ? {
             url: product.fields.featuredImage.url,

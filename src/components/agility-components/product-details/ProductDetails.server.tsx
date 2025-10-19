@@ -7,11 +7,12 @@ import type { IProduct } from '@/lib/types/IProduct'
 import type { IVariant } from '@/lib/types/IVariant'
 import type { ISize } from '@/lib/types/ISize'
 import type { IProductImage } from '@/lib/types/IProductImage'
+import type { ImageField } from '@agility/nextjs'
 
 interface IRelatedProduct {
 	title: string
-	price: number
-	featuredImage: { url: string; label?: string }
+	basePrice: string
+	featuredImage?: ImageField
 	slug: string
 }
 
@@ -76,7 +77,7 @@ export const ProductDetails = async ({ module, languageCode }: UnloadedModulePro
 
 	// Fetch related products from same category if enabled
 	let relatedProducts: ContentItem<IRelatedProduct>[] = []
-	if (config.showRelatedProducts && product.fields.category) {
+	if (config.showRelatedProducts === "true" && product.fields.category) {
 		// In a real implementation, you'd query products by category
 		// For now, we'll leave it empty
 	}

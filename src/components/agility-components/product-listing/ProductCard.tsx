@@ -4,7 +4,7 @@ import { motion } from "motion/react"
 import { clsx } from "clsx"
 import { ShoppingCartIcon } from "@heroicons/react/24/outline"
 import Link from "next/link"
-import type { ContentItem } from "@agility/nextjs"
+import { AgilityPic, type ContentItem } from "@agility/nextjs"
 import type { IProduct } from "@/lib/types/IProduct"
 
 interface ProductCardProps {
@@ -16,7 +16,7 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product, displayStyle, ctaLabel, index }: ProductCardProps) => {
 	const {
-		fields: { title, description, basePrice, category, slug },
+		fields: { title, description, basePrice, category, slug, featuredImage },
 		contentID
 	} = product
 
@@ -47,10 +47,23 @@ export const ProductCard = ({ product, displayStyle, ctaLabel, index }: ProductC
 						displayStyle === 'grid' ? "aspect-square" : "sm:w-64 sm:flex-shrink-0 aspect-square sm:aspect-auto"
 					)}
 				>
-					<div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-						<div className="text-6xl mb-2">📦</div>
-						<span className="text-sm text-gray-500 dark:text-gray-400">Image Coming Soon</span>
-					</div>
+					{featuredImage?.url ? (
+						<AgilityPic
+							image={featuredImage}
+							fallbackWidth={400}
+							className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+							sources={[
+								{ media: "(max-width: 639px)", width: 400 },
+								{ media: "(max-width: 1023px)", width: 600 },
+								{ media: "(min-width: 1024px)", width: 800 }
+							]}
+						/>
+					) : (
+						<div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+							<div className="text-6xl mb-2">📦</div>
+							<span className="text-sm text-gray-500 dark:text-gray-400">Image Coming Soon</span>
+						</div>
+					)}
 					{categoryName && (
 						<div className="absolute top-3 left-3">
 							<span className="inline-block px-3 py-1 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-full text-xs font-semibold text-gray-700 dark:text-gray-300">

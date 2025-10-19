@@ -61,14 +61,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback(
     (product: IProduct, variant: IVariant, quantity: number = 1) => {
+      const variantSKU = variant.variantSKU || `${product.sku}-${variant.color || variant.colorName || 'default'}`
+
       setItems((currentItems) => {
         const existingItem = currentItems.find(
-          (item) => item.variantSKU === variant.variantSKU
+          (item) => item.variantSKU === variantSKU
         )
 
         if (existingItem) {
           return currentItems.map((item) =>
-            item.variantSKU === variant.variantSKU
+            item.variantSKU === variantSKU
               ? { ...item, quantity: item.quantity + quantity }
               : item
           )
@@ -78,7 +80,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           ...currentItems,
           {
             productId: 0, // Will be set properly in real implementation
-            variantSKU: variant.variantSKU,
+            variantSKU,
             product,
             variant,
             quantity,

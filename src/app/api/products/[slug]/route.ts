@@ -42,7 +42,7 @@ export async function GET(
       slug: product.fields.slug,
       description: product.fields.description,
       basePrice: product.fields.basePrice,
-      category: product.fields.category?.fields?.title || null,
+      category: product.fields.category?.fields?.name || null,
       featuredImage: product.fields.featuredImage
         ? {
             url: product.fields.featuredImage.url,

@@ -60,9 +60,10 @@ export function CartProvider({ children }: CartProviderProps) {
   }
 
   const addToCart = (product: IProduct, variant: IVariant, quantity: number = 1) => {
+    const variantSKU = variant.variantSKU || `${product.sku}-${variant.color || 'default'}`
     setCart((prevCart) => {
       const existingItemIndex = prevCart.items.findIndex(
-        (item) => item.variantSKU === variant.variantSKU
+        (item) => item.variantSKU === variantSKU
       )
 
       let newItems: ICartItem[]
@@ -78,7 +79,7 @@ export function CartProvider({ children }: CartProviderProps) {
         // Add new item to cart
         const newItem: ICartItem = {
           productId: parseInt(product.sku) || 0,
-          variantSKU: variant.variantSKU,
+          variantSKU,
           product,
           variant,
           quantity,

@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { ContentItem, ImageField } from '@agility/nextjs'
+import { AgilityPic, type ContentItem, type ImageField } from '@agility/nextjs'
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import { ShoppingCartIcon, TruckIcon, XMarkIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { motion } from 'motion/react'
 import { clsx } from 'clsx'
+import { useCart } from '@/lib/hooks/useCart'
 import type { IProductDetails } from '@/lib/types/IProductDetails'
 import type { IProduct } from '@/lib/types/IProduct'
 import type { IVariant } from '@/lib/types/IVariant'
@@ -14,8 +15,8 @@ import type { IProductImage } from '@/lib/types/IProductImage'
 
 interface IRelatedProduct {
 	title: string
-	price: number
-	featuredImage: { url: string; label?: string }
+	basePrice: string
+	featuredImage?: ImageField
 	slug: string
 }
 
@@ -24,16 +25,6 @@ const getStockStatus = (quantity: number) => {
 	if (quantity === 0) return { label: 'Out of Stock', color: 'text-red-600 dark:text-red-400', bgColor: 'bg-red-50 dark:bg-red-900/20' }
 	if (quantity < 10) return { label: `Low Stock (${quantity} left)`, color: 'text-yellow-600 dark:text-yellow-400', bgColor: 'bg-yellow-50 dark:bg-yellow-900/20' }
 	return { label: 'In Stock', color: 'text-green-600 dark:text-green-400', bgColor: 'bg-green-50 dark:bg-green-900/20' }
-}
-
-// Mock cart hook (since none exists in the codebase)
-const useCart = () => {
-	return {
-		addToCart: (product: any) => {
-			console.log('Adding to cart:', product)
-			alert(`Added ${product.quantity}x ${product.title} to cart`)
-		}
-	}
 }
 
 interface ProductDetailsClientProps {
@@ -57,7 +48,7 @@ export function ProductDetailsClient({
 	contentID
 }: ProductDetailsClientProps) {
 	const { fields } = product
-	const cart = useCart()
+	const { addItem, openCart } = useCart()
 
 	// State management
 	const [selectedVariant, setSelectedVariant] = useState<ContentItem<IVariant> | null>(variants[0] || null)
@@ -108,19 +99,17 @@ export function ProductDetailsClient({
 			return
 		}
 
-		cart.addToCart({
-			title: fields.title,
-			variant: selectedVariant.fields.variantName || selectedVariant.fields.details,
-			color: selectedVariant.fields.colorName || selectedVariant.fields.color,
-			size: selectedSize,
-			price: selectedVariant.fields.price,
-			quantity,
-			image: selectedImage
-		})
+		// Add item to cart using the proper interface
+		addItem(fields, selectedVariant.fields, quantity)
+
+		// Open the cart drawer to show the added item
+		openCart()
 	}
 
 	const stockStatus = selectedVariant ? getStockStatus(selectedVariant.fields.stockQuantity) : null
-	const displayPrice = selectedVariant?.fields.price ?? (typeof fields.basePrice === 'string' ? parseFloat(fields.basePrice) : 0)
+	const displayPrice = selectedVariant?.fields.price
+		? (typeof selectedVariant.fields.price === 'string' ? parseFloat(selectedVariant.fields.price) : selectedVariant.fields.price)
+		: (typeof fields.basePrice === 'string' ? parseFloat(fields.basePrice) : fields.basePrice)
 
 	// Get unique colors for variant selection
 	const uniqueColors = Array.from(
@@ -143,10 +132,15 @@ export function ProductDetailsClient({
 						{/* Main Image */}
 						<div className="aspect-square w-full overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800">
 							{selectedImage?.url ? (
-								<img
-									src={selectedImage.url}
-									alt={fields.title}
+								<AgilityPic
+									image={selectedImage}
+									fallbackWidth={800}
 									className="h-full w-full object-cover object-center"
+									sources={[
+										{ media: "(max-width: 639px)", width: 600 },
+										{ media: "(max-width: 1023px)", width: 800 },
+										{ media: "(min-width: 1024px)", width: 1000 }
+									]}
 								/>
 							) : (
 								<div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
@@ -169,9 +163,9 @@ export function ProductDetailsClient({
 												: 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'
 										)}
 									>
-										<img
-											src={fields.featuredImage.url}
-											alt="Main"
+										<AgilityPic
+											image={fields.featuredImage}
+											fallbackWidth={200}
 											className="h-full w-full object-cover"
 										/>
 									</button>
@@ -188,9 +182,9 @@ export function ProductDetailsClient({
 										)}
 									>
 										{img.fields.image?.url ? (
-											<img
-												src={img.fields.image.url}
-												alt={img.fields.altText}
+											<AgilityPic
+												image={img.fields.image}
+												fallbackWidth={200}
 												className="h-full w-full object-cover"
 											/>
 										) : (
@@ -340,7 +334,7 @@ export function ProductDetailsClient({
 							</button>
 
 							{/* Shipping Info */}
-							{config.showShippingInfo && config.shippingMessage && (
+							{config.showShippingInfo === "true" && config.shippingMessage && (
 								<div
 									className="flex items-start gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4"
 									data-agility-field="shippingMessage"
@@ -381,10 +375,14 @@ export function ProductDetailsClient({
 								>
 									<div className="aspect-square overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
 										{relatedProduct.fields.featuredImage?.url ? (
-											<img
-												src={relatedProduct.fields.featuredImage.url}
-												alt={relatedProduct.fields.title}
+											<AgilityPic
+												image={relatedProduct.fields.featuredImage}
+												fallbackWidth={400}
 												className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+												sources={[
+													{ media: "(max-width: 639px)", width: 300 },
+													{ media: "(min-width: 640px)", width: 400 }
+												]}
 											/>
 										) : (
 											<div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
@@ -397,7 +395,7 @@ export function ProductDetailsClient({
 										{relatedProduct.fields.title}
 									</h3>
 									<p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
-										${relatedProduct.fields.price.toFixed(2)}
+										${relatedProduct.fields.basePrice || '0.00'}
 									</p>
 								</motion.a>
 							))}
@@ -407,7 +405,7 @@ export function ProductDetailsClient({
 			</div>
 
 			{/* Size Guide Modal */}
-			{config.enableSizeGuide && (
+			{config.enableSizeGuide === "true" && (
 				<Dialog open={sizeGuideOpen} onClose={() => setSizeGuideOpen(false)} className="relative z-50">
 					<DialogBackdrop
 						as={motion.div}

@@ -1,8 +1,8 @@
 export interface IProductDetails {
-	showRelatedProducts: boolean
+	showRelatedProducts: string
 	relatedProductsHeading: string
-	enableSizeGuide: boolean
+	enableSizeGuide: string
 	sizeGuideLink: string
-	showShippingInfo: boolean
+	showShippingInfo: string
 	shippingMessage: string
 }

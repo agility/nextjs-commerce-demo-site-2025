@@ -3,7 +3,7 @@
 import { useCart } from "@/lib/hooks/useCart"
 import { getStripe } from "@/lib/stripe/client"
 import { motion } from "motion/react"
-import Image from "next/image"
+import { AgilityPic } from "@agility/nextjs"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
@@ -41,7 +41,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           items: cart.items.map((item) => ({
             id: item.variantSKU,
-            name: `${item.product.title} - ${item.variant.name}`,
+            name: `${item.product.title} - ${item.variant.variantName || item.variant.details || item.variant.colorName || item.variant.color || 'Default'}`,
             price: item.variant.price,
             quantity: item.quantity,
             image: item.product.featuredImage?.url,
@@ -55,18 +55,11 @@ export default function CheckoutPage() {
         throw new Error(data.error || "Failed to create checkout session")
       }
 
-      // Redirect to Stripe checkout
-      const stripe = await getStripe()
-      if (!stripe) {
-        throw new Error("Stripe failed to initialize")
-      }
-
-      const { error: stripeError } = await stripe.redirectToCheckout({
-        sessionId: data.sessionId,
-      })
-
-      if (stripeError) {
-        throw new Error(stripeError.message)
+      // Redirect to Stripe checkout using the URL
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        throw new Error("No checkout URL returned")
       }
     } catch (err) {
       console.error("Checkout error:", err)
@@ -122,11 +115,10 @@ export default function CheckoutPage() {
                     >
                       {item.product.featuredImage && (
                         <div className="relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
-                          <Image
-                            src={item.product.featuredImage.url}
-                            alt={item.product.title}
-                            fill
-                            className="object-cover"
+                          <AgilityPic
+                            image={item.product.featuredImage}
+                            fallbackWidth={80}
+                            className="w-full h-full object-cover"
                           />
                         </div>
                       )}
@@ -136,7 +128,7 @@ export default function CheckoutPage() {
                           {item.product.title}
                         </h3>
                         <p className="text-sm text-gray-500 mt-1">
-                          {item.variant.name}
+                          {item.variant.variantName || item.variant.details || item.variant.colorName || item.variant.color || 'Default'}
                         </p>
                         <p className="text-sm text-gray-500 mt-1">
                           Quantity: {item.quantity}
