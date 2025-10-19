@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         currency: "usd",
         product_data: {
           name: item.product.title,
-          description: `${item.variant.color || ""} ${item.variant.size.fields.title || ""}`.trim(),
+          description: `${item.variant.color || ""} - ${item.variant.size.fields.title || ""}`.trim(),
           images: item.product.featuredImage?.url ? [item.product.featuredImage.url] : [],
           metadata: {
             productSku: item.product.sku,

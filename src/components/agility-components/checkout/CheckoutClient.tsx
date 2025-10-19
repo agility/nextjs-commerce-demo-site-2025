@@ -180,10 +180,10 @@ export function CheckoutClient({ heading, description, taxRate, contentID }: Che
 
                       <div className="text-right">
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          ${(item.variant.price * item.quantity).toFixed(2)}
+                          {/* ${(item.variant.price * item.quantity).toFixed(2)} */}
                         </p>
                         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                          ${item.variant.price.toFixed(2)} each
+                          ${item.variant.price} each
                         </p>
                       </div>
                     </motion.div>
