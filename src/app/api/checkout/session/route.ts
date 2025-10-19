@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
           email: session.customer_details.email.toLowerCase(),
           name: session.customer_details.name || undefined,
           phone: session.customer_details.phone || undefined,
-          address: session.customer_details.address || undefined,
+
           metadata: {
             source: "guest_checkout",
             sessionId: session.id,
