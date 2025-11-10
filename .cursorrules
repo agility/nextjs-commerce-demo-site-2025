@@ -225,3 +225,4 @@ interface IFeaturedProducts {
 - Reference Tailwind CSS v4 documentation at https://tailwindcss.com/docs
 - Maintain accessibility standards with Heroicons and semantic HTML
 - Test responsiveness with Tailwind's mobile-first approach
+
